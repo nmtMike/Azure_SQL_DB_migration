@@ -70,4 +70,23 @@ flown_aircraft_leg = pd.read_sql_query('SELECT * FROM flown_aircraft_leg', conn)
 flown_aircraft_leg['modified_time'] = pd.to_datetime(flown_aircraft_leg['modified_time'])
 flown_aircraft_leg['std_lt'] = pd.to_datetime(flown_aircraft_leg['std_lt'])
 flown_aircraft_leg['sta_lt'] = pd.to_datetime(flown_aircraft_leg['sta_lt'])
+flown_aircraft_leg.to_sql('flown_aircraft_leg', az_db_conn, if_exists='replace', index=False)
+
+# inflow_cash
+inflow_cash = pd.read_sql_query('SELECT * FROM inflow_cash', conn)
+inflow_cash['modified_time'] = pd.to_datetime(inflow_cash['modified_time'])
+inflow_cash['Date'] = pd.to_datetime(inflow_cash['Date'])
+inflow_cash.to_sql('inflow_cash', az_db_conn, if_exists='replace', index=False)
+
+# log_table
+log_table = pd.read_sql_query('SELECT * FROM log_table', conn)
+log_table['modified_time'] = pd.to_datetime(log_table['modified_time'])
+log_table.to_sql('log_table', az_db_conn, if_exists='replace', index=False)
+
+# market_pricing
+market_pricing = pd.read_sql_query('SELECT * FROM market_pricing', conn)
+market_pricing['modified_time'] = pd.to_datetime(market_pricing['modified_time'])
+market_pricing['departure_datetime'] = pd.to_datetime(market_pricing['departure_datetime'])
+market_pricing['pricing_date'] = pd.to_datetime(market_pricing['pricing_date'])
+market_pricing.to_sql('market_pricing', az_db_conn, if_exists='replace', index=False)
 
