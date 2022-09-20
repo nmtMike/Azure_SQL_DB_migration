@@ -3,11 +3,8 @@ import sqlite3
 import pandas as pd
 import glob
 import os
-import openpyxl
 import numpy as np
 from tqdm import tqdm
-import xlrd
-import time
 import datetime
 from datetime import timedelta
 pd.options.mode.chained_assignment = None
@@ -65,6 +62,7 @@ def load_payment_detail():
         li = []
         for i in tqdm(range(len(payment_detail_files_dir)), desc='load payment_detail'):
             df = pd.read_csv(payment_detail_files_dir[i], skiprows=2)
+            df.dropna(how='all', inplace=True)
             df['file_name'] = payment_detail_files_name[i]
             df['modified_time'] = payment_detail_files_mod_time[i]
             li.append(df)
