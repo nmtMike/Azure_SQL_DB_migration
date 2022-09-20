@@ -90,3 +90,10 @@ market_pricing['departure_datetime'] = pd.to_datetime(market_pricing['departure_
 market_pricing['pricing_date'] = pd.to_datetime(market_pricing['pricing_date'])
 market_pricing.to_sql('market_pricing', az_db_conn, if_exists='replace', index=False)
 
+# pax_revenue
+pax_revenue = pd.read_sql_query('SELECT * FROM pax_revenue', conn)
+pax_revenue['modified_time'] = pd.to_datetime(pax_revenue['modified_time'])
+pax_revenue['DEPARTURE_DATE'] = pd.to_datetime(pax_revenue['DEPARTURE_DATE'])
+pax_revenue['BOOK_DATE'] = pd.to_datetime(pax_revenue['BOOK_DATE'])
+pax_revenue.to_sql('pax_revenue', az_db_conn, if_exists='replace', index=False)
+
