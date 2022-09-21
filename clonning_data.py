@@ -97,3 +97,4 @@ pax_revenue['DEPARTURE_DATE'] = pd.to_datetime(pax_revenue['DEPARTURE_DATE'])
 pax_revenue['BOOK_DATE'] = pd.to_datetime(pax_revenue['BOOK_DATE'])
 pax_revenue.to_sql('pax_revenue', az_db_conn, if_exists='replace', index=False)
 
+

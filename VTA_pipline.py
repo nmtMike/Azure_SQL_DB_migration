@@ -86,6 +86,7 @@ def load_payment_detail():
            'RPT_AMOUNT', 'file_name', 'modified_time']
         add_payment_detail['IATA_NUM'].fillna(add_payment_detail['USER_ID'], inplace=True)
         add_payment_detail['IATA_NUM'].fillna(add_payment_detail['BOOKING_AGENT'], inplace=True)
+        add_payment_detail['RPT_AMOUNT'] = add_payment_detail['RPT_AMOUNT'].str.replace(',', '')
 
     #     write to SQLite
         add_payment_detail.to_sql('payment_detail', conn, if_exists='append', index=False)
