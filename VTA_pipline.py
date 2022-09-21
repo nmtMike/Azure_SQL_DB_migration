@@ -567,6 +567,7 @@ total_market_price = market_price.copy()
 total_market_price['adjusted_price'] = total_market_price['price'] - total_market_price['bag'] * 160000
 column_order = ['name','bag', 'meal', 'adjusted_price', 'sector', 'departure_datetime', 'pricing_date', 'file_name', 'modified_time']
 total_market_price = total_market_price[column_order].reset_index(drop=True)
+total_market_price['type'] = 'normal'
 
 column_order = ['name', 'VU','bag', 'meal', 'price', 'sector', 'departure_date', 'departure_datetime', 'pricing_date', 'file_name', 'modified_time']
 market_price = market_price[column_order].reset_index(drop=True)
@@ -597,6 +598,7 @@ market_pricing['VU_compare_unique_flight_code'] = market_pricing['VU_compare'] +
 market_pricing = market_pricing[['VU_compare_unique_flight_code', 'name', 'bag', 'meal',
                                  'adjusted_price', 'departure_datetime', 'pricing_date', 'file_name', 'modified_time']]
 market_pricing.drop_duplicates(inplace=True)
+market_pricing['type'] = 'normal'
 
 #     write to SQL
 market_pricing.to_sql('market_pricing', conn, if_exists='replace', index=False)
@@ -659,6 +661,7 @@ total_market_price = market_price.copy()
 total_market_price['adjusted_price'] = total_market_price['price'] - total_market_price['bag'] * 160000
 column_order = ['name','bag', 'meal', 'adjusted_price', 'sector', 'departure_datetime', 'pricing_date', 'file_name', 'modified_time']
 total_market_price = total_market_price[column_order].reset_index(drop=True)
+total_market_price['type'] = 'Lunar Newyear'
 
 column_order = ['name', 'VU','bag', 'meal', 'price', 'sector', 'departure_date', 'departure_datetime', 'pricing_date', 'file_name', 'modified_time']
 market_price = market_price[column_order].reset_index(drop=True)
@@ -689,6 +692,7 @@ market_pricing['VU_compare_unique_flight_code'] = market_pricing['VU_compare'] +
 market_pricing = market_pricing[['VU_compare_unique_flight_code', 'name', 'bag', 'meal',
                                  'adjusted_price', 'departure_datetime', 'pricing_date', 'file_name', 'modified_time']]
 market_pricing.drop_duplicates(inplace=True)
+market_pricing['type'] = 'normal'
 
 #     write to SQL
 market_pricing.to_sql('market_pricing', conn, if_exists='append', index=False)
@@ -702,4 +706,4 @@ print('replicate pricing normal days: done')
 
 
 
-print('ETL----> Done')
+print('ETL--------> Done')
