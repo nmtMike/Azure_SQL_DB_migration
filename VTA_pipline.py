@@ -518,7 +518,7 @@ else: print('No need to replicate')
 
 
 
-
+# ____________________________________pricing for normal days
 # collect all file in folder 'pricing'
 pricing_folder = file_name_modified(r'D:\NMT\OneDrive\Viettravel Airline\Database\fact\pricing')['dir_file']
 li = []
@@ -601,6 +601,105 @@ market_pricing.drop_duplicates(inplace=True)
 #     write to SQL
 market_pricing.to_sql('market_pricing', conn, if_exists='replace', index=False)
 total_market_price.to_sql('total_market_price', conn, if_exists='replace', index=False)
-print('replicate pricing: done')
+print('replicate pricing normal days: done')
+
+
+
+
+
+
+
+
+# ____________________________________pricing for Lunar Newyear
+# collect all file in folder 'pricing'
+pricing_folder = file_name_modified(r'D:\NMT\OneDrive\Viettravel Airline\Database\fact\pricing_special_days\Lunar_newyear')['dir_file']
+li = []
+for folder in pricing_folder:
+    li.append(file_name_modified(folder))
+price_date_route = pd.concat(li, axis=0, ignore_index=True)
+
+price_date_route.rename(columns={'file_name':'sector', 'table_name':'pricing_date'}, inplace=True)
+price_date_route['pricing_date'] = pd.to_datetime(price_date_route['pricing_date'], format='%Y%m%d.%H%M')
+
+# create a function to apply onto DataFrame price_date_route
+#     collect all file in subfolders
+li = []
+def collect_file_dirs(row):
+    files_to_read = file_name_modified(row['dir_file'])
+    files_to_read['pricing_date'] = row['pricing_date']
+    li.append(files_to_read)
+
+price_date_route.apply(collect_file_dirs, axis=1)
+pricing = pd.DataFrame()
+pricing = pd.concat(li, ignore_index=True)
+
+# create a function to apply onto dataframe pricing
+#     read all files in subfolders
+li = []
+temp_df = pd.DataFrame()
+def read_pricing_files(row):
+    temp_df = pd.read_csv(row['dir_file'])
+    temp_df['sector'] = row['table_name']
+    temp_df['pricing_date'] = row['pricing_date']
+    temp_df['file_name'] = row['file_name']
+    temp_df['modified_time'] = row['modified_time']
+    temp_df.rename(columns={'date':'departure_date'}, inplace=True)
+    li.append(temp_df)
+
+pricing.apply(read_pricing_files, axis=1)
+market_price = pd.concat(li, ignore_index=True)
+
+market_price['price'] = market_price['price'].str.replace(',', '')
+market_price = market_price.astype({'price':'int64'})
+market_price['departure_datetime'] = pd.to_datetime(market_price['departure_date'] + ' ' + market_price['time'].str[:5])
+market_price['VU'] = (market_price['name'].str[:2] == 'VU')*1
+market_price['departure_date'] = pd.to_datetime(market_price['departure_date'])
+
+total_market_price = market_price.copy()
+total_market_price['adjusted_price'] = total_market_price['price'] - total_market_price['bag'] * 160000
+column_order = ['name','bag', 'meal', 'adjusted_price', 'sector', 'departure_datetime', 'pricing_date', 'file_name', 'modified_time']
+total_market_price = total_market_price[column_order].reset_index(drop=True)
+
+column_order = ['name', 'VU','bag', 'meal', 'price', 'sector', 'departure_date', 'departure_datetime', 'pricing_date', 'file_name', 'modified_time']
+market_price = market_price[column_order].reset_index(drop=True)
+
+#     load the diff time of VU flights
+dim_pricing = pd.read_excel(r'D:\NMT\OneDrive\Viettravel Airline\Database\dim\dim_pricing\dim_pricing.xlsx')
+
+pricing_reference = market_price.set_index('name').join(dim_pricing.set_index('flight_num')).reset_index()
+pricing_reference.rename(columns={'index':'flight_num'}, inplace=True)
+pricing_reference.dropna(inplace=True)
+
+pricing_reference = pricing_reference[['flight_num', 'sector', 'departure_datetime', 'diff_hours']]
+pricing_reference.rename(columns={'flight_num':'VU_compare'}, inplace=True)
+pricing_reference['max_time'] = pricing_reference['departure_datetime'] + pd.to_timedelta(pricing_reference['diff_hours'], unit='hours')
+pricing_reference['min_time'] = pricing_reference['departure_datetime'] - pd.to_timedelta(pricing_reference['diff_hours'], unit='hours')
+pricing_reference['departure_date'] = pd.to_datetime(pricing_reference['departure_datetime'].dt.date)
+
+a = pricing_reference.set_index(keys=['departure_date', 'sector'])[['VU_compare', 'max_time', 'min_time']]
+b = market_price.set_index(keys=['departure_date', 'sector'])
+c = a.join(b)
+
+market_pricing = c[(c['departure_datetime'] >= c['min_time']) & (c['departure_datetime'] <= c['max_time'])]
+market_pricing.reset_index(inplace=True)
+# market_pricing['flight_num'] = market_pricing['name'].str[2:]
+# market_pricing['airlines'] = market_pricing['name'].str[:2]
+market_pricing['adjusted_price'] = market_pricing['price'] - market_pricing['bag'] * 160000
+market_pricing['VU_compare_unique_flight_code'] = market_pricing['VU_compare'] + '_' + market_pricing['departure_date'].dt.strftime('%Y%m%d')
+market_pricing = market_pricing[['VU_compare_unique_flight_code', 'name', 'bag', 'meal',
+                                 'adjusted_price', 'departure_datetime', 'pricing_date', 'file_name', 'modified_time']]
+market_pricing.drop_duplicates(inplace=True)
+
+#     write to SQL
+market_pricing.to_sql('market_pricing', conn, if_exists='append', index=False)
+total_market_price.to_sql('total_market_price', conn, if_exists='append', index=False)
+print('replicate pricing normal days: done')
+
+
+
+
+
+
+
 
 print('ETL----> Done')
