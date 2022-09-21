@@ -515,9 +515,6 @@ if len(pax_revenue_files_dir) != 0:
     print('replicate flights: done')
 else: print('No need to replicate')
 
-print('ETL----> Done')
-
-
 
 
 
@@ -604,3 +601,6 @@ market_pricing.drop_duplicates(inplace=True)
 #     write to SQL
 market_pricing.to_sql('market_pricing', conn, if_exists='replace', index=False)
 total_market_price.to_sql('total_market_price', conn, if_exists='replace', index=False)
+print('replicate pricing: done')
+
+print('ETL----> Done')
