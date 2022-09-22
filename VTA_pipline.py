@@ -88,7 +88,7 @@ def load_payment_detail():
         add_payment_detail['IATA_NUM'].fillna(add_payment_detail['BOOKING_AGENT'], inplace=True)
         try:
             tmp = add_payment_detail['RPT_AMOUNT'].copy()
-            add_payment_detail['RPT_AMOUNT'].str.replace(',', '')
+            add_payment_detail['RPT_AMOUNT'] = add_payment_detail['RPT_AMOUNT'].str.replace(',', '')
             add_payment_detail['RPT_AMOUNT'].fillna(tmp, inplace=True)
         except:
             pass
