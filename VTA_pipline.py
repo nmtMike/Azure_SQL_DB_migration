@@ -486,40 +486,44 @@ new_log_table.to_sql('log_table', conn, if_exists='replace', index=False)
 print('write new log_table: done')
 
 
-# Create Replicated days: 
-#     For each unique flight code, replicate from the earliest booked date to the departure date
-pax_revenue_files_dir = add_table[add_table['table_name'] == 'pax_revenue'].reset_index(drop=True)['dir_file']
 
-if len(pax_revenue_files_dir) != 0:
-    query = """
-    SELECT carrier_code || flight_num || '_' || strftime('%Y%m%d', departure_date) AS unique_flight_code,
-            MAX(cnt_date) AS max_days
-        FROM pax_revenue
-        GROUP BY unique_flight_code
-    """
-    df = pd.read_sql_query(query, conn)
-    df = df.reset_index()
 
-    replicated = pd.DataFrame()
-    li = []
-    for ind, row in df.iterrows():
-        unique_flight_code = np.array([row[1]] * (row[2] + 1))
-        days = np.array(range(0, row[2] + 1))
+# # Create Replicated days: 
+# #     For each unique flight code, replicate from the earliest booked date to the departure date
+# pax_revenue_files_dir = add_table[add_table['table_name'] == 'pax_revenue'].reset_index(drop=True)['dir_file']
 
-        vu_revenue = np.array(range(0, row[2] + 1))
-        vu_revenue.fill(0)
+# if len(pax_revenue_files_dir) != 0:
+#     query = """
+#     SELECT carrier_code || flight_num || '_' || strftime('%Y%m%d', departure_date) AS unique_flight_code,
+#             MAX(cnt_date) AS max_days
+#         FROM pax_revenue
+#         GROUP BY unique_flight_code
+#     """
+#     df = pd.read_sql_query(query, conn)
+#     df = df.reset_index()
 
-        loaded_pax = np.array(range(0, row[2] + 1))
-        loaded_pax.fill(0)
+#     replicated = pd.DataFrame()
+#     li = []
+#     for ind, row in df.iterrows():
+#         unique_flight_code = np.array([row[1]] * (row[2] + 1))
+#         days = np.array(range(0, row[2] + 1))
 
-        replicate = pd.DataFrame({'unique_flight_code':unique_flight_code, 'days_before_departure':days,
-                                 'vu_revenue':vu_revenue, 'loaded_pax':loaded_pax})
-        li.append(replicate)
+#         vu_revenue = np.array(range(0, row[2] + 1))
+#         vu_revenue.fill(0)
 
-    replicated = pd.concat(li, axis=0, ignore_index=True)
-    replicated.to_sql('replicated_flight_code_days', conn, if_exists='replace')
-    print('replicate flights: done')
-else: print('No need to replicate')
+#         loaded_pax = np.array(range(0, row[2] + 1))
+#         loaded_pax.fill(0)
+
+#         replicate = pd.DataFrame({'unique_flight_code':unique_flight_code, 'days_before_departure':days,
+#                                  'vu_revenue':vu_revenue, 'loaded_pax':loaded_pax})
+#         li.append(replicate)
+
+#     replicated = pd.concat(li, axis=0, ignore_index=True)
+#     replicated.to_sql('replicated_flight_code_days', conn, if_exists='replace')
+#     print('replicate flights: done')
+# else: print('No need to replicate')
+
+
 
 
 

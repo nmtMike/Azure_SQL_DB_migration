@@ -97,4 +97,14 @@ pax_revenue['DEPARTURE_DATE'] = pd.to_datetime(pax_revenue['DEPARTURE_DATE'])
 pax_revenue['BOOK_DATE'] = pd.to_datetime(pax_revenue['BOOK_DATE'])
 pax_revenue.to_sql('pax_revenue', az_db_conn, if_exists='replace', index=False)
 
+# payment_detail
+payment_detail = pd.read_sql_query('SELECT * FROM payment_detail', conn)
+payment_detail['modified_time'] = pd.to_datetime(payment_detail['modified_time'])
+payment_detail['BOOK_DATE_GMT'] = pd.to_datetime(payment_detail['BOOK_DATE_GMT'])
+payment_detail['BOOK_DATE_LCL'] = pd.to_datetime(payment_detail['BOOK_DATE_LCL'])
+payment_detail['LAST_MODIFIED_GMT'] = pd.to_datetime(payment_detail['LAST_MODIFIED_GMT'])
+payment_detail['LAST_MODIFIED_LCL'] = pd.to_datetime(payment_detail['LAST_MODIFIED_LCL'])
+payment_detail['DATE_PAID_GMT'] = pd.to_datetime(payment_detail['DATE_PAID_GMT'])
+payment_detail['DATE_PAID_LCL'] = pd.to_datetime(payment_detail['DATE_PAID_LCL'])
+payment_detail.to_sql('payment_detail', az_db_conn, if_exists='replace', index=False)
 
