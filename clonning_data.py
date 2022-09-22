@@ -108,3 +108,21 @@ payment_detail['DATE_PAID_GMT'] = pd.to_datetime(payment_detail['DATE_PAID_GMT']
 payment_detail['DATE_PAID_LCL'] = pd.to_datetime(payment_detail['DATE_PAID_LCL'])
 payment_detail.to_sql('payment_detail', az_db_conn, if_exists='replace', index=False)
 
+# reservation
+reservation = pd.read_sql_query('SELECT * FROM reservation', conn)
+reservation['book_date'] = pd.to_datetime(reservation['book_date'])
+reservation['departure_date'] = pd.to_datetime(reservation['departure_date'])
+reservation['modified_time'] = pd.to_datetime(reservation['departure_date'])
+reservation.to_sql('reservation', az_db_conn, if_exists='replace', index=False)
+
+# target_cost
+target_cost = pd.read_sql_query('SELECT * FROM target_cost', conn)
+target_cost['Valid_date'] = pd.to_datetime(target_cost['Valid_date'])
+target_cost.to_sql('target_cost', az_db_conn, if_exists='replace', index=False)
+
+# total_market_price
+total_market_price = pd.read_sql_query('SELECT * FROM total_market_price', conn)
+total_market_price['departure_datetime'] = pd.to_datetime(total_market_price['departure_datetime'])
+total_market_price['pricing_date'] = pd.to_datetime(total_market_price['pricing_date'])
+total_market_price['modified_time'] = pd.to_datetime(total_market_price['modified_time'])
+total_market_price.to_sql('total_market_price', az_db_conn, if_exists='replace', index=False)
