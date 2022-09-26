@@ -1,13 +1,13 @@
 # import and create connection to Azure SQL Database
 import urllib
 import pandas as pd
-from sqlalchemy import create_engine, inspect, MetaData, Table, Column, Integer, String, Date, Float, DateTime
+from sqlalchemy import create_engine, MetaData
 
 az_db_driver = "{ODBC Driver 17 for SQL Server}"
 az_db_server = "vta-server.database.windows.net"
-az_db_database = "vta-database"
+az_db_database = "vta-prm-database"
 az_db_user = "vtaadmin"
-az_db_password = "PRMvta2022mike"
+az_db_password = "PRM@vta2022"
 
 az_db_string = f"""Driver={az_db_driver};Server=tcp:{az_db_server},1433;Database={az_db_database};
 Uid={az_db_user};Pwd={az_db_password};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"""
@@ -32,38 +32,45 @@ cargo = pd.read_sql_query('SELECT * FROM cargo', conn)
 cargo['flight_date'] = pd.to_datetime(cargo['flight_date'])
 cargo['modified_time'] = pd.to_datetime(cargo['modified_time'])
 cargo.to_sql('cargo', az_db_conn, if_exists='replace', index=False)
+print('cargo -> done')
 
 # dim_agent
 dim_agent = pd.read_sql_query('SELECT * FROM dim_agent', conn)
 dim_agent['modified_time'] = pd.to_datetime(dim_agent['modified_time'])
 dim_agent.to_sql('dim_agent', az_db_conn, if_exists='replace', index=False)
+print('dim_agent -> done')
 
 # dim_calendar
 dim_calendar = pd.read_sql_query('SELECT * FROM dim_calendar', conn)
 dim_calendar['Date'] = pd.to_datetime(dim_calendar['Date'])
 dim_calendar['modified_time'] = pd.to_datetime(dim_calendar['modified_time'])
 dim_calendar.to_sql('dim_calendar', az_db_conn, if_exists='replace', index=False)
+print('dim_calendar -> done')
 
 # dim_fare_code
 dim_fare_code = pd.read_sql_query('SELECT * FROM dim_fare_code', conn)
 dim_fare_code['valid_date'] = pd.to_datetime(dim_fare_code['valid_date'])
 dim_fare_code['modified_time'] = pd.to_datetime(dim_fare_code['modified_time'])
 dim_fare_code.to_sql('dim_fare_code', az_db_conn, if_exists='replace', index=False)
+print('dim_fare_code -> done')
 
 # dim_routes
 dim_routes = pd.read_sql_query('SELECT * FROM dim_routes', conn)
 dim_routes['modified_time'] = pd.to_datetime(dim_routes['modified_time'])
 dim_routes.to_sql('dim_routes', az_db_conn, if_exists='replace', index=False)
+print('dim_routes -> done')
 
 # dim_slot_time
 dim_slot_time = pd.read_sql_query('SELECT * FROM dim_slot_time', conn)
 dim_slot_time['modified_time'] = pd.to_datetime(dim_slot_time['modified_time'])
 dim_slot_time.to_sql('dim_slot_time', az_db_conn, if_exists='replace', index=False)
+print('dim_slot_time -> done')
 
 # flight_type
 flight_type = pd.read_sql_query('SELECT * FROM flight_type', conn)
 flight_type['modified_time'] = pd.to_datetime(flight_type['modified_time'])
 flight_type.to_sql('flight_type', az_db_conn, if_exists='replace', index=False)
+print('flight_type -> done')
 
 # flown_aircraft_leg
 flown_aircraft_leg = pd.read_sql_query('SELECT * FROM flown_aircraft_leg', conn)
@@ -71,17 +78,20 @@ flown_aircraft_leg['modified_time'] = pd.to_datetime(flown_aircraft_leg['modifie
 flown_aircraft_leg['std_lt'] = pd.to_datetime(flown_aircraft_leg['std_lt'])
 flown_aircraft_leg['sta_lt'] = pd.to_datetime(flown_aircraft_leg['sta_lt'])
 flown_aircraft_leg.to_sql('flown_aircraft_leg', az_db_conn, if_exists='replace', index=False)
+print('flown_aircraft_leg -> done')
 
 # inflow_cash
 inflow_cash = pd.read_sql_query('SELECT * FROM inflow_cash', conn)
 inflow_cash['modified_time'] = pd.to_datetime(inflow_cash['modified_time'])
 inflow_cash['Date'] = pd.to_datetime(inflow_cash['Date'])
 inflow_cash.to_sql('inflow_cash', az_db_conn, if_exists='replace', index=False)
+print('inflow_cash -> done')
 
 # log_table
 log_table = pd.read_sql_query('SELECT * FROM log_table', conn)
 log_table['modified_time'] = pd.to_datetime(log_table['modified_time'])
 log_table.to_sql('log_table', az_db_conn, if_exists='replace', index=False)
+print('log_table -> done')
 
 # market_pricing
 market_pricing = pd.read_sql_query('SELECT * FROM market_pricing', conn)
@@ -89,6 +99,7 @@ market_pricing['modified_time'] = pd.to_datetime(market_pricing['modified_time']
 market_pricing['departure_datetime'] = pd.to_datetime(market_pricing['departure_datetime'])
 market_pricing['pricing_date'] = pd.to_datetime(market_pricing['pricing_date'])
 market_pricing.to_sql('market_pricing', az_db_conn, if_exists='replace', index=False)
+print('market_pricing -> done')
 
 # pax_revenue
 pax_revenue = pd.read_sql_query('SELECT * FROM pax_revenue', conn)
@@ -96,6 +107,7 @@ pax_revenue['modified_time'] = pd.to_datetime(pax_revenue['modified_time'])
 pax_revenue['DEPARTURE_DATE'] = pd.to_datetime(pax_revenue['DEPARTURE_DATE'])
 pax_revenue['BOOK_DATE'] = pd.to_datetime(pax_revenue['BOOK_DATE'])
 pax_revenue.to_sql('pax_revenue', az_db_conn, if_exists='replace', index=False)
+print('pax_revenue -> done')
 
 # payment_detail
 payment_detail = pd.read_sql_query('SELECT * FROM payment_detail', conn)
@@ -107,6 +119,7 @@ payment_detail['LAST_MODIFIED_LCL'] = pd.to_datetime(payment_detail['LAST_MODIFI
 payment_detail['DATE_PAID_GMT'] = pd.to_datetime(payment_detail['DATE_PAID_GMT'])
 payment_detail['DATE_PAID_LCL'] = pd.to_datetime(payment_detail['DATE_PAID_LCL'])
 payment_detail.to_sql('payment_detail', az_db_conn, if_exists='replace', index=False)
+print('payment_detail -> done')
 
 # reservation
 reservation = pd.read_sql_query('SELECT * FROM reservation', conn)
@@ -114,11 +127,13 @@ reservation['book_date'] = pd.to_datetime(reservation['book_date'])
 reservation['departure_date'] = pd.to_datetime(reservation['departure_date'])
 reservation['modified_time'] = pd.to_datetime(reservation['departure_date'])
 reservation.to_sql('reservation', az_db_conn, if_exists='replace', index=False)
+print('reservation -> done')
 
 # target_cost
 target_cost = pd.read_sql_query('SELECT * FROM target_cost', conn)
 target_cost['Valid_date'] = pd.to_datetime(target_cost['Valid_date'])
 target_cost.to_sql('target_cost', az_db_conn, if_exists='replace', index=False)
+print('target_cost -> done')
 
 # total_market_price
 total_market_price = pd.read_sql_query('SELECT * FROM total_market_price', conn)
@@ -126,3 +141,4 @@ total_market_price['departure_datetime'] = pd.to_datetime(total_market_price['de
 total_market_price['pricing_date'] = pd.to_datetime(total_market_price['pricing_date'])
 total_market_price['modified_time'] = pd.to_datetime(total_market_price['modified_time'])
 total_market_price.to_sql('total_market_price', az_db_conn, if_exists='replace', index=False)
+print('total_market_price -> done')
