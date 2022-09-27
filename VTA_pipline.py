@@ -613,7 +613,7 @@ market_pricing['type'] = 'normal'
 #     write to SQL
 market_pricing.to_sql('market_pricing', conn, if_exists='replace', index=False)
 total_market_price.to_sql('total_market_price', conn, if_exists='replace', index=False)
-print('replicate pricing normal days: done')
+print(f'replicate pricing normal days {total_market_price.shape} : done')
 
 
 
@@ -707,7 +707,7 @@ market_pricing['type'] = 'normal'
 #     write to SQL
 market_pricing.to_sql('market_pricing', conn, if_exists='append', index=False)
 total_market_price.to_sql('total_market_price', conn, if_exists='append', index=False)
-print('replicate pricing normal days: done')
+print(f'replicate pricing Lunar Newyear {total_market_price.shape} : done')
 
 
 
