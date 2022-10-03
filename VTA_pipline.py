@@ -3,7 +3,6 @@ import sqlite3
 import pandas as pd
 import glob
 import os
-import numpy as np
 from tqdm import tqdm
 import datetime
 from datetime import timedelta
@@ -15,10 +14,10 @@ c = conn.cursor()
 
 # create functions----------------------------------------------------------------
 
-def delete_rows_SQL(table, row_name):
+def delete_rows_SQL(table, file_mame):
     query = f"""
         DELETE FROM {table}
-            WHERE file_name = '{row_name}'
+            WHERE file_name = '{file_mame}'
         """
     c.execute(query)
     conn.commit()
