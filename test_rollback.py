@@ -3,7 +3,7 @@ import pandas as pd
 
 
 # create connection to sqlite
-conn = sqlite3.connect(r"D:\NMT\OneDrive\Viettravel Airline\Database\VTA_RM.db")
+conn = sqlite3.connect(r"C:\Users\admin\Desktop\Temp\VTA_RM - testing.db")
 c = conn.cursor()
 
 def delete_rows_SQL(table, file_name):
@@ -13,10 +13,4 @@ def delete_rows_SQL(table, file_name):
         """
     c.execute(query)
     conn.commit()
-
-
-
-
-
-
 
