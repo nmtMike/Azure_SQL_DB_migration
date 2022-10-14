@@ -20,12 +20,12 @@ def delete_rows_SQL(table, file_mame):
             WHERE file_name = '{file_mame}'
         """
     c.execute(query)
-    conn.commit()
+    # conn.commit()
 # ---------------------------------------------------------------------------------
 
 def delete_rows_cmd(row):
     delete_rows_SQL(row['table_name'], row['file_name'])
-    return row['file_name']
+    return None
 
 
 
@@ -54,6 +54,8 @@ def load_payment_detail():
     payment_detail_files_dir = add_table[add_table['table_name'] == 'payment_detail'].reset_index(drop=True)['dir_file']
     payment_detail_files_mod_time = add_table[add_table['table_name'] == 'payment_detail'].reset_index(drop=True)['modified_time']
     payment_detail_files_name = add_table[add_table['table_name'] == 'payment_detail'].reset_index(drop=True)['file_name']
+
+    payment_detail_remove = remove_table
 
     if len(payment_detail_files_dir) != 0:
 
@@ -462,8 +464,8 @@ remove_table = pd.concat([previous_log_table, keep_table]).drop_duplicates(ignor
 add_table = pd.concat([new_log_table, keep_table]).drop_duplicates(ignore_index=True, keep=False)
 
 # remove rows
-remove_table.apply(delete_rows_cmd, axis=1)
-print('remove rows: done')
+# remove_table.apply(delete_rows_cmd, axis=1)
+# print('remove rows: done')
 
 # load new rows
 load_payment_detail()
