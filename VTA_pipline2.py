@@ -9,10 +9,10 @@ from datetime import timedelta
 pd.options.mode.chained_assignment = None
 
 # create connection to sqlite
-conn = sqlite3.connect(r"D:\NMT\OneDrive\Viettravel Airline\Database\VTA_RM.db")
+conn = sqlite3.connect(r"D:\NMT\OneDrive\Viettravel Airline\Database\VTA_RM_test.db")
 c = conn.cursor()
 
-# create functions----------------------------------------------------------------
+# create delete rows functions----------------------------------------------------------------
 
 def delete_rows_SQL(table, file_mame):
     query = f"""
@@ -20,20 +20,22 @@ def delete_rows_SQL(table, file_mame):
             WHERE file_name = '{file_mame}'
         """
     c.execute(query)
-    # conn.commit()
-# ---------------------------------------------------------------------------------
+    conn.commit()
 
 def delete_rows_cmd(row):
     delete_rows_SQL(row['table_name'], row['file_name'])
     return None
 
-
-
+def apply_delete_row(table:pd.DataFrame):
+    if table.shape[0] != 0:
+        table.apply(delete_rows_cmd, axis=1)
+        print('_________rows deleted')
+    return None
+    
 # _______________ fact tables _______________
 
 def file_name_modified(path:str):
     all_dir_files = glob.glob(path + '/*')
-    files = pd.DataFrame()
     m_time = []
 
     for dir_file in all_dir_files:
@@ -54,8 +56,6 @@ def load_payment_detail():
     payment_detail_files_dir = add_table[add_table['table_name'] == 'payment_detail'].reset_index(drop=True)['dir_file']
     payment_detail_files_mod_time = add_table[add_table['table_name'] == 'payment_detail'].reset_index(drop=True)['modified_time']
     payment_detail_files_name = add_table[add_table['table_name'] == 'payment_detail'].reset_index(drop=True)['file_name']
-
-    payment_detail_remove = remove_table
 
     if len(payment_detail_files_dir) != 0:
 
@@ -94,10 +94,14 @@ def load_payment_detail():
         except:
             pass
 
-    #     write to SQLite
-        add_payment_detail.to_sql('payment_detail', conn, if_exists='append', index=False)
+    #     delete and update new rows to SQLite
+        apply_delete_row(remove_table[remove_table['table_name'] == 'payment_detail'])
+        try: add_payment_detail.to_sql('payment_detail', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
     else:
         print('No "Payment details" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'payment_detail'])
+
 # ---------------------------------------------------------------------------------
 
 def load_pax_revenue():
@@ -112,18 +116,22 @@ def load_pax_revenue():
             df = pd.read_excel(pax_revenue_files_dir[i], index_col=None, header=0)
             df['file_name'] = pax_revenue_files_name[i]
             df['modified_time'] = pax_revenue_files_mod_time[i]
-#             df.columns = ['CONFIRMATION_NUM', 'RES_SEG_STATUS_DESCRIPTION', 'BOOKING_AGENT', 'IATA_NUM', 'FARE_CLASS_CODE'
-#                          , 'SAVED_FB_CODE', 'PTC_DESCRIPTION', 'TITLE', 'LAST_NAME', 'FIRST_NAME', 'INFANT', 'FLIGHT_NUM'
-#                          , 'CARRIER_CODE', 'FROM_AIRPORT', 'TO_AIRPORT', 'DEPARTURE_DATE', 'DEPARTURE_TIME'
-#                          , 'FLIGHT_STATUS', 'BOOK_DATE', 'CNT_DATE', 'BF', 'PNLT', 'AX', 'C4', 'YR01', 'YR02'
-#                          , 'YQ', 'TOTAL_TAX', 'SERVICES_FEE', 'file_name', 'modified_time']
+            # df.columns = ['CONFIRMATION_NUM', 'RES_SEG_STATUS_DESCRIPTION', 'BOOKING_AGENT', 'IATA_NUM', 'FARE_CLASS_CODE'
+            #              , 'SAVED_FB_CODE', 'PTC_DESCRIPTION', 'TITLE', 'LAST_NAME', 'FIRST_NAME', 'INFANT', 'FLIGHT_NUM'
+            #              , 'CARRIER_CODE', 'FROM_AIRPORT', 'TO_AIRPORT', 'DEPARTURE_DATE', 'DEPARTURE_TIME'
+            #              , 'FLIGHT_STATUS', 'BOOK_DATE', 'CNT_DATE', 'BF', 'PNLT', 'AX', 'C4', 'YR01', 'YR02'
+            #              , 'YQ', 'TOTAL_TAX', 'SERVICES_FEE', 'file_name', 'modified_time']
             li.append(df)
         add_pax_revenue = pd.concat(li, axis=0, ignore_index=True)
 
-    #     load to sqlite
-        add_pax_revenue.to_sql('pax_revenue', conn, if_exists='append', index=False)
+    #   delete and update new rows to SQLite
+        apply_delete_row(remove_table[remove_table['table_name'] == 'pax_revenue'])
+        try: add_pax_revenue.to_sql('pax_revenue', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
+    else:
+        print('No "Pax Revenue" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'pax_revenue'])
 
-    else: print('No "Pax Revenue" file need to be added')
 # ---------------------------------------------------------------------------------
 
 def load_inflow_cash():
@@ -142,9 +150,13 @@ def load_inflow_cash():
         add_inflow_cash = pd.concat(li, axis=0, ignore_index=True)
 
     #     load to sqlite
-        add_inflow_cash.to_sql('inflow_cash', conn, if_exists='append', index=False)
+        apply_delete_row(remove_table[remove_table['table_name'] == 'inflow_cash'])
+        try: add_inflow_cash.to_sql('inflow_cash', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
 
-    else: print('No "Inflow Cash" file need to be added')
+    else: 
+        print('No "Inflow Cash" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'inflow_cash'])
 # ---------------------------------------------------------------------------------
 
 def load_cargo():
@@ -168,9 +180,14 @@ def load_cargo():
                         'revenue_after_tax', 'file_name', 'modified_time']
 
     #     load to sqlite
-        add_cargo.to_sql('cargo', conn, if_exists='append', index=False)
+        apply_delete_row(remove_table[remove_table['table_name'] == 'cargo'])
+        try: add_cargo.to_sql('cargo', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
 
-    else: print('No "cargo" file need to be added')
+    else: 
+        print('No "cargo" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'cargo'])
+
 # ---------------------------------------------------------------------------------
 
 def load_flown_aircraft_leg():
@@ -195,9 +212,13 @@ def load_flown_aircraft_leg():
            'schedule_group', 'file_name', 'modified_time']
 
     #     load to sqlite
-        add_flown_aircraft_leg.to_sql('flown_aircraft_leg', conn, if_exists='append', index=False)
+        apply_delete_row(remove_table[remove_table['table_name'] == 'flown_aircraft_leg'])
+        try: add_flown_aircraft_leg.to_sql('flown_aircraft_leg', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
 
-    else: print('No "flown_aircraft_leg" file need to be added')
+    else:
+        print('No "flown_aircraft_leg" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'flown_aircraft_leg'])
 # ---------------------------------------------------------------------------------        
 
 def load_reservation():
@@ -224,15 +245,14 @@ def load_reservation():
                               'copr_id', 'record_locator', 'eticket_num', 'file_name', 'modified_time']
 
     #     load to sqlite
-        add_reservation.to_sql('reservation', conn, if_exists='append', index=False)
+        apply_delete_row(remove_table[remove_table['table_name'] == 'reservation'])
+        try: add_reservation.to_sql('reservation', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
 
-    else: print('No "Pax Revenue" file need to be added')
-        
-        
-
-        
-        
-        
+    else:
+        print('No "Pax Revenue" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'reservation'])
+                
 # _______________ dim tables_______________
 
 def load_dim_agent():
@@ -252,9 +272,13 @@ def load_dim_agent():
 
 
     #     load to sqlite
-        add_dim_agent.to_sql('dim_agent', conn, if_exists='append', index=False)
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_agent'])
+        try: add_dim_agent.to_sql('dim_agent', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
 
-    else: print('No "dim_agent" file need to be added')
+    else:
+        print('No "dim_agent" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_agent'])
 # ---------------------------------------------------------------------------------
 
 def load_dim_calendar():
@@ -274,9 +298,13 @@ def load_dim_calendar():
 
 
     #     load to sqlite
-        add_dim_calendar.to_sql('dim_calendar', conn, if_exists='append', index=False)
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_calendar'])
+        try: add_dim_calendar.to_sql('dim_calendar', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
 
-    else: print('No "dim_calendar" file need to be added')
+    else:
+        print('No "dim_calendar" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_calendar'])
 # ---------------------------------------------------------------------------------
 
 def load_dim_fare_code():
@@ -296,9 +324,13 @@ def load_dim_fare_code():
 
 
     #     load to sqlite
-        add_dim_fare_code.to_sql('dim_fare_code', conn, if_exists='append', index=False)
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_fare_code'])
+        try: add_dim_fare_code.to_sql('dim_fare_code', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
 
-    else: print('No "dim_calendar" file need to be added')
+    else:
+        print('No "dim_fare_code" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_fare_code'])
 # ---------------------------------------------------------------------------------        
 
 def load_dim_routes():
@@ -318,9 +350,13 @@ def load_dim_routes():
 
 
     #     load to sqlite
-        add_dim_routes.to_sql('dim_routes', conn, if_exists='append', index=False)
-
-    else: print('No "dim_routes" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_routes'])
+        try: add_dim_routes.to_sql('dim_routes', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
+        
+    else:
+        print('No "dim_routes" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_routes'])
 # ---------------------------------------------------------------------------------              
         
 def load_dim_slot_time():
@@ -340,9 +376,13 @@ def load_dim_slot_time():
 
 
     #     load to sqlite
-        add_dim_slot_time.to_sql('dim_slot_time', conn, if_exists='replace', index=False)
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_slot_time'])
+        try: add_dim_slot_time.to_sql('dim_slot_time', conn, if_exists='replace', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
 
-    else: print('No "dim_slot_time" file need to be added')
+    else:
+        print('No "dim_slot_time" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_slot_time'])
 # ---------------------------------------------------------------------------------              
         
 def load_flight_type():
@@ -362,9 +402,13 @@ def load_flight_type():
 
 
     #     load to sqlite
-        add_flight_type.to_sql('flight_type', conn, if_exists='append', index=False)
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_slot_time'])
+        try: add_flight_type.to_sql('flight_type', conn, if_exists='append', index=False)
+        except: print('*****WARNING***** cannot add new rows to SQLite')
 
-    else: print('No "flight_type" file need to be added')
+    else:
+        print('No "flight_type" file need to be added')
+        apply_delete_row(remove_table[remove_table['table_name'] == 'dim_slot_time'])
         
 # ---------------------------------------------------------------------------------         
         
@@ -463,9 +507,6 @@ keep_table = pd.concat([previous_log_table, diff_table, diff_table]).drop_duplic
 remove_table = pd.concat([previous_log_table, keep_table]).drop_duplicates(ignore_index=True, keep=False)
 add_table = pd.concat([new_log_table, keep_table]).drop_duplicates(ignore_index=True, keep=False)
 
-# remove rows
-# remove_table.apply(delete_rows_cmd, axis=1)
-# print('remove rows: done')
 
 # load new rows
 load_payment_detail()
@@ -485,48 +526,6 @@ load_target_cost()
 # write new log_table
 new_log_table.to_sql('log_table', conn, if_exists='replace', index=False)
 print('write new log_table: done')
-
-
-
-
-# # Create Replicated days: 
-# #     For each unique flight code, replicate from the earliest booked date to the departure date
-# pax_revenue_files_dir = add_table[add_table['table_name'] == 'pax_revenue'].reset_index(drop=True)['dir_file']
-
-# if len(pax_revenue_files_dir) != 0:
-#     query = """
-#     SELECT carrier_code || flight_num || '_' || strftime('%Y%m%d', departure_date) AS unique_flight_code,
-#             MAX(cnt_date) AS max_days
-#         FROM pax_revenue
-#         GROUP BY unique_flight_code
-#     """
-#     df = pd.read_sql_query(query, conn)
-#     df = df.reset_index()
-
-#     replicated = pd.DataFrame()
-#     li = []
-#     for ind, row in df.iterrows():
-#         unique_flight_code = np.array([row[1]] * (row[2] + 1))
-#         days = np.array(range(0, row[2] + 1))
-
-#         vu_revenue = np.array(range(0, row[2] + 1))
-#         vu_revenue.fill(0)
-
-#         loaded_pax = np.array(range(0, row[2] + 1))
-#         loaded_pax.fill(0)
-
-#         replicate = pd.DataFrame({'unique_flight_code':unique_flight_code, 'days_before_departure':days,
-#                                  'vu_revenue':vu_revenue, 'loaded_pax':loaded_pax})
-#         li.append(replicate)
-
-#     replicated = pd.concat(li, axis=0, ignore_index=True)
-#     replicated.to_sql('replicated_flight_code_days', conn, if_exists='replace')
-#     print('replicate flights: done')
-# else: print('No need to replicate')
-
-
-
-
 
 
 # ____________________________________pricing for normal days
@@ -709,11 +708,6 @@ market_pricing['type'] = 'normal'
 market_pricing.to_sql('market_pricing', conn, if_exists='append', index=False)
 total_market_price.to_sql('total_market_price', conn, if_exists='append', index=False)
 print(f'replicate pricing Lunar Newyear {total_market_price.shape} : done')
-
-
-
-
-
 
 
 
