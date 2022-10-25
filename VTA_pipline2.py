@@ -11,6 +11,7 @@ pd.options.mode.chained_assignment = None
 # create connection to sqlite
 conn = sqlite3.connect(r"D:\NMT\OneDrive\Viettravel Airline\Database\VTA_RM_test.db")
 c = conn.cursor()
+warining_msg = '*****WARNING***** cannot add new rows to SQLite'
 
 # create delete rows functions----------------------------------------------------------------
 
@@ -29,7 +30,7 @@ def delete_rows_cmd(row):
 def apply_delete_row(table:pd.DataFrame):
     if table.shape[0] != 0:
         table.apply(delete_rows_cmd, axis=1)
-        print('_________rows deleted')
+        print('|_________ rows deleted')
     return None
     
 # _______________ fact tables _______________
@@ -97,7 +98,7 @@ def load_payment_detail():
     #     delete and update new rows to SQLite
         apply_delete_row(remove_table[remove_table['table_name'] == 'payment_detail'])
         try: add_payment_detail.to_sql('payment_detail', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
     else:
         print('No "Payment details" file need to be added')
         apply_delete_row(remove_table[remove_table['table_name'] == 'payment_detail'])
@@ -127,7 +128,7 @@ def load_pax_revenue():
     #   delete and update new rows to SQLite
         apply_delete_row(remove_table[remove_table['table_name'] == 'pax_revenue'])
         try: add_pax_revenue.to_sql('pax_revenue', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
     else:
         print('No "Pax Revenue" file need to be added')
         apply_delete_row(remove_table[remove_table['table_name'] == 'pax_revenue'])
@@ -152,7 +153,7 @@ def load_inflow_cash():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'inflow_cash'])
         try: add_inflow_cash.to_sql('inflow_cash', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
 
     else: 
         print('No "Inflow Cash" file need to be added')
@@ -182,7 +183,7 @@ def load_cargo():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'cargo'])
         try: add_cargo.to_sql('cargo', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
 
     else: 
         print('No "cargo" file need to be added')
@@ -214,7 +215,7 @@ def load_flown_aircraft_leg():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'flown_aircraft_leg'])
         try: add_flown_aircraft_leg.to_sql('flown_aircraft_leg', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
 
     else:
         print('No "flown_aircraft_leg" file need to be added')
@@ -247,7 +248,7 @@ def load_reservation():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'reservation'])
         try: add_reservation.to_sql('reservation', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
 
     else:
         print('No "Pax Revenue" file need to be added')
@@ -274,7 +275,7 @@ def load_dim_agent():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'dim_agent'])
         try: add_dim_agent.to_sql('dim_agent', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
 
     else:
         print('No "dim_agent" file need to be added')
@@ -300,7 +301,7 @@ def load_dim_calendar():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'dim_calendar'])
         try: add_dim_calendar.to_sql('dim_calendar', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
 
     else:
         print('No "dim_calendar" file need to be added')
@@ -326,7 +327,7 @@ def load_dim_fare_code():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'dim_fare_code'])
         try: add_dim_fare_code.to_sql('dim_fare_code', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
 
     else:
         print('No "dim_fare_code" file need to be added')
@@ -352,7 +353,7 @@ def load_dim_routes():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'dim_routes'])
         try: add_dim_routes.to_sql('dim_routes', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
         
     else:
         print('No "dim_routes" file need to be added')
@@ -378,7 +379,7 @@ def load_dim_slot_time():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'dim_slot_time'])
         try: add_dim_slot_time.to_sql('dim_slot_time', conn, if_exists='replace', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
 
     else:
         print('No "dim_slot_time" file need to be added')
@@ -404,7 +405,7 @@ def load_flight_type():
     #     load to sqlite
         apply_delete_row(remove_table[remove_table['table_name'] == 'dim_slot_time'])
         try: add_flight_type.to_sql('flight_type', conn, if_exists='append', index=False)
-        except: print('*****WARNING***** cannot add new rows to SQLite')
+        except: print(warining_msg)
 
     else:
         print('No "flight_type" file need to be added')
@@ -620,8 +621,6 @@ print(f'replicate pricing normal days {total_market_price.shape} : done')
 
 
 
-
-
 # ____________________________________pricing for Lunar Newyear
 # collect all file in folder 'pricing'
 pricing_folder = file_name_modified(r'D:\NMT\OneDrive\Viettravel Airline\Database\fact\pricing_special_days\Lunar_newyear')['dir_file']
@@ -711,4 +710,4 @@ print(f'replicate pricing Lunar Newyear {total_market_price.shape} : done')
 
 
 
-print('ETL--------> Done')
+print('ETL---------------------------------> Done')
